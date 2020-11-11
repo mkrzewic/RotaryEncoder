@@ -12,16 +12,15 @@
 #include "Arduino.h"
 #include "RotaryEncoder.h"
 
-
 // The array holds the values �1 for the entries where a position was decremented,
 // a 1 for the entries where the position was incremented
 // and 0 in all the other (no change or not valid) cases.
 
 const int8_t KNOBDIR[] = {
-  0, -1,  1,  0,
-  1,  0,  0, -1,
+   0, -1,  1,  0,
+   1,  0,  0, -1,
   -1,  0,  0,  1,
-0,  1, -1,  0  };
+   0,  1, -1,  0         };
 
 
 // positions: [3] 1 0 2 [3] 1 0 2 [3]
@@ -32,12 +31,12 @@ const int8_t KNOBDIR[] = {
 
 // ----- Initialization and Default Values -----
 
-RotaryEncoder::RotaryEncoder(int pin1, int pin2) {
-  
+RotaryEncoder::RotaryEncoder(uint8_t pin1, uint8_t pin2) {
+
   // Remember Hardware Setup
   _pin1 = pin1;
   _pin2 = pin2;
-  
+
   // Setup the input pins and turn on pullup resistor
   pinMode(pin1, INPUT_PULLUP);
   pinMode(pin2, INPUT_PULLUP);
@@ -60,7 +59,7 @@ long  RotaryEncoder::getPosition() {
 RotaryEncoder::Direction RotaryEncoder::getDirection() {
 
     RotaryEncoder::Direction ret = Direction::NOROTATION;
-    
+
     if( _positionExtPrev > _positionExt )
     {
         ret = Direction::COUNTERCLOCKWISE;
@@ -71,15 +70,14 @@ RotaryEncoder::Direction RotaryEncoder::getDirection() {
         ret = Direction::CLOCKWISE;
         _positionExtPrev = _positionExt;
     }
-    else 
+    else
     {
         ret = Direction::NOROTATION;
         _positionExtPrev = _positionExt;
-    }        
-    
+    }
+
     return ret;
 }
-
 
 
 void RotaryEncoder::setPosition(long newPosition) {
@@ -92,26 +90,24 @@ void RotaryEncoder::setPosition(long newPosition) {
 
 void RotaryEncoder::tick(void)
 {
-  int sig1 = digitalRead(_pin1);
-  int sig2 = digitalRead(_pin2);
-  int8_t thisState = sig1 | (sig2 << 1);
+  int8_t thisState = digitalRead(_pin1) | (digitalRead(_pin2) << 1);
 
   if (_oldState != thisState) {
     _position += KNOBDIR[thisState | (_oldState<<2)];
-    
+
     if (thisState == LATCHSTATE) {
       _positionExt = _position >> 2;
       _positionExtTimePrev = _positionExtTime;
       _positionExtTime = millis();
     }
-    
+
     _oldState = thisState;
   } // if
 } // tick()
 
 unsigned long RotaryEncoder::getMillisBetweenRotations() const
 {
-  return _positionExtTime - _positionExtTimePrev; 
+  return _positionExtTime - _positionExtTimePrev;
 }
 
 
